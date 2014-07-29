@@ -1,0 +1,9 @@
+﻿<Window x:Class="MsgViewer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:msgViewer="clr-namespace:MsgViewer"
+        Title="MainWindow" Height="600" Width="800">
+    <Grid>
+        <WebBrowser Grid.Row="0" HorizontalAlignment="Stretch" Name="WebMessages" VerticalAlignment="Stretch" />
+    </Grid>
+</Window>
