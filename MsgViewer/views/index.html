@@ -12,6 +12,7 @@
     <script src="./js/jquery.min-1.11.1.js"></script>
     <!-- Latest compiled and minified JavaScript -->
     <script src="./js/bootstrap.min.js"></script>
+    <script src="./utils.js"></script>
 
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
@@ -21,12 +22,13 @@
     <![endif]-->
 
     <style type='text/css'>
-      body {border: 2px outset;}
-      .messages{width: 100%; height: 100%; background-color:white; padding: 10px }
-      .groups{width: 200px; overflow: hidden; text-align: center; border-right: 1px outset; vertical-align: top}
-      .group{background-color: white; padding: 2px; width: 160px; margin: 0 auto; }
+      body {}
+      .messages{ border: 1px outset; overflow-y: scroll; padding: 10px; vertical-align:top; position: fixed; top: 45px; right: 10px; left: 200px; bottom: 20px; }
+      .groups{width: 200px; height: 100%; position: fixed; top: 10px; left: 10px; bottom: 10px; overflow-y: scroll; text-align: center; border-right: 1px outset; vertical-align: top; }
+      .group{padding: 2px; width: 160px; margin: 0 auto; height: auto}
       .groupTitle {font-weight: bold; border: 1px dotted; background-color: gray; height:25px;}
-      .contact{background-color: white; height:30px; line-height: 30px; font-weight: normal; }
+      .contactFilter {color: gray}
+      .contact{background-color: white; height:30px; line-height: 30px; font-weight: normal; text-overflow: ellipsis; overflow:hidden; white-space:nowrap}
       .contact.active {background-color: teal;}
       .contact:hover {background-color: aqua;}
       #curPage {width: 54px; height: 22px; text-align: center;}
@@ -46,6 +48,8 @@
       Viewer.PageSize = 10;
       Viewer.PageCount = 0;
       Viewer.PageIndex = 0;
+      Viewer.FilterText = "";
+      Viewer.FilterTimer = null;
 
       // 加载User信息
       function OnChatInfo(chat) {
@@ -53,7 +57,7 @@
         var title = '';
         for(var i=0;i<userCount; ++i) {
           var userId = chat.GetUserId(i);
-          if(userId == Viewer.SelfUserId)
+          if(userCount ==2 && userId == Viewer.SelfUserId)
             continue;
           var userInfo = window.external.GetUserInfo(userId);
           title += userInfo.Name + ',';
@@ -66,9 +70,10 @@
       // 添加讨论组
       function addChat(chatId, userCount, title) {
         var group = (userCount > 2) ? $("#groupChat") : $("#singleChat");
-        var li = $('<li class="contact">' + title + '</li>');
+        var li = $('<li class="contact" title="' + title + '">' + title + '</li>');
         li.appendTo(group);
         li.prop('chatId', chatId);
+        li.tooltip({delay: 500});
       }
 
       // 显示消息页数
@@ -105,6 +110,40 @@
         messages.append(para);
       }
 
+      // 开始根据用户的输入，过滤联系人
+      function StartFilterContacts() {
+        if(!Viewer.FilterTimer)
+          Viewer.FilterTimer = setInterval(FilterContacts, 200);
+      }
+
+      // 停止根据用户的输入过滤联系人
+      function StopFilterContacts() {
+        if(Viewer.FilterTimer) {
+          clearInterval(Viewer.FilterTimer);
+          Viewer.FilterTimer = null;
+        }
+      }
+
+      // 根据用户的输入，过滤联系人
+      function FilterContacts() {
+        var filter = $('#editFilter').val();
+        if(filter == Viewer.FilterText)
+          return;
+        Viewer.FilterText = filter;
+        var lowerFilter = filter.toLocaleLowerCase();
+
+        var messages = $(".messages");
+        messages.empty();
+        $('.contact').each(function() {
+          $(this).removeClass("active");
+          var title = $(this).text();
+          if(title.toLocaleLowerCase().indexOf(lowerFilter) >= 0)
+            $(this).show();
+          else
+            $(this).hide();
+        });
+      }
+
       $(document).ready(function(){
         window.external.ReloadChatInfo('OnChatInfo');
 
@@ -121,6 +160,32 @@
             return;
           showMsg(Viewer.PageIndex + 1);
         });
+
+        // 查找
+        $("#btnSearch").click(function() {
+          if(!Viewer.CurContact)
+            return;
+          var chatId = $(Viewer.CurContact).prop('chatId');
+          if(!chatId)
+            return;
+
+          var filter = $('#editSearch').val();
+          if(filter.length == 0) {
+            showMsg(Viewer.PageIndex);
+            return;
+          }
+          var messages = $(".messages");
+          messages.empty();
+          var msgCount = window.external.SearchMsgCount(chatId, filter);
+          Viewer.PageIndex = 0;
+          Viewer.PageCount = Viewer.PageSize;
+          showPageCount();
+          window.external.SearchMsg('addMessage', chatId, filter, Viewer.PageIndex, Viewer.PageSize);
+        });
+
+        // 
+        $("#editFilter").focus(StartFilterContacts);
+        $("#editFilter").blur(StopFilterContacts);
 
         // 联系人被点击
         $(".contact").click(function(){
@@ -143,38 +208,43 @@
           // 显示消息
           showMsg(Viewer.PageCount - 1);
         });
+
       });
     </script>
   </head>
   <body>
 
-<table style="width: 100%; height: 100%">
-  <tr>
-    <td class="groups">
+    <div class="groups">
+      <div class="contactFilter">
+        <input type="text" id="editFilter" placeholder='输入名字或者简写过滤'></input>
+      </div>
       <div class="group">
         <div class="groupTitle">个人</div>
         <ul class="nav" id='singleChat'>
         </ul>
-      <div>
-      <div class="group">
-        <div class="groupTitle">讨论组</div>
-        <ul id='groupChat'>
-        </ul>
       </div>
-    </td>
+      <div>
+        <div class="group">
+          <div class="groupTitle">讨论组</div>
+          <ul id='groupChat'>
+          </ul>
+        </div>
+      </div>
+    </div>
 
-    <td class="messages">
-    </td>
-  </tr>
-  <tr>
-    <td class="groups"></td>
-    <td style="float: right">
+    <form style="position: fixed; top: 10px; right: 10px; left: 200px; bottom: 20px;" >
+      <input type="text" id="editSearch" placeholder='在当前联系人消息中查找' ></input>
+      <input type="button" id="btnSearch" value="查找"></input>
+    </form>
+
+    <div class="messages">
+    </div>
+
+    <div style="position: fixed; bottom: 1px; right: 10px">
       <a id='lastPage' href='#'>&lt;  </a>
       <span id='curPage' >0</span> / <span id='totalPage'>0</span>
       <a id='nextPage' href='#'>  &gt;</a>
-    </td>
-  </tr>
-</table>
+    </div>
 
 </body>
 </html>

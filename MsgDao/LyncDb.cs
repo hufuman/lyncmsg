@@ -34,7 +34,7 @@ namespace MsgDao
             const string chatSql =
                 "CREATE TABLE if not exists [Chat] ( [ChatId] integer PRIMARY KEY AUTOINCREMENT NOT NULL, [UserIds] nvarchar(1000) NOT NULL)";
             const string msgSql =
-                "CREATE TABLE if not exists [Message] ( [MessageId] integer PRIMARY KEY AUTOINCREMENT NOT NULL, [HtmlMsg] ntext NOT NULL, [PlainMsg] ntext NOT NULL, [Data] ntext, [DateTime] TIMESTAMP default (datetime('now', 'localtime')), [Type] smallint NOT NULL, [ChatId] bigint NOT NULL, [UserId] bigint NOT NULL)";
+                "CREATE TABLE if not exists [Message] ( [MessageId] integer PRIMARY KEY AUTOINCREMENT NOT NULL, [HtmlMsg] ntext NOT NULL, [PlainMsg] ntext NOT NULL, [Data] ntext, [DateTime] TIMESTAMP default (datetime('now', 'localtime')), [Type] smallint NOT NULL, [ChatId] bigint NOT NULL, [UserId] bigint NOT NULL, [LyncConvId] ntext)";
             const string userSql =
                 "CREATE TABLE if not exists [User] ( [UserId] integer PRIMARY KEY AUTOINCREMENT NOT NULL, [Uri] varchar(100) NOT NULL, [Name] varchar(100) NOT NULL, [Email] varchar(200) NOT NULL);";
             return DbUtil.ExecuteSqlNoQuery(SqlCnn, chatSql, null)

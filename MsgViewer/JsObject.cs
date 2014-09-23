@@ -47,6 +47,18 @@ namespace MsgViewer
             }
         }
 
+        public long SearchMsgCount(long chatId, string keyword)
+        {
+            return MsgDb.GetDb().SearchMsgCount(keyword, chatId);
+        }
+
+        public void SearchMsg(string funcName, long chatId, string keyword, int pageIndex, int pageSize)
+        {
+            var msgs = MsgDb.GetDb().SearchMsg(keyword, chatId, pageIndex, pageSize);
+            if (msgs != null && msgs.Count > 0)
+                msgs.ForEach(msg => _browser.InvokeScript(funcName, msg));
+        }
+
         public int PrepareMsg(long charId, int pageIndex, int pageSize)
         {
             ClearMsg();

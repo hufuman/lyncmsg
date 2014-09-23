@@ -7,11 +7,17 @@ namespace LyncMsg
 {
     class LConversation
     {
+        private string _convId;
         private long _dbChatId;
         private readonly Dictionary<string, UserInfo> _mapMsgRecHandlers = new Dictionary<string, UserInfo>();
 
         public LConversation(Conversation conversation)
         {
+            object idValue;
+            if (conversation.Properties.TryGetValue(ConversationProperty.Id, out idValue))
+                _convId = (string)idValue;
+            else
+                _convId = "";
             int count = conversation.Participants.Count;
             for (int i = 0; i < count; ++i)
             {
@@ -20,7 +26,6 @@ namespace LyncMsg
             }
             conversation.ParticipantAdded += ParticipantAdded;
             conversation.ParticipantRemoved += ParticipantRemoved;
-            RefreshMsgId();
         }
 
         private void AddParticipant(Participant participant)
@@ -54,13 +59,11 @@ namespace LyncMsg
         private void ParticipantAdded(object sender, ParticipantCollectionChangedEventArgs args)
         {
             AddParticipant(args.Participant);
-            RefreshMsgId();
         }
 
         private void ParticipantRemoved(object sender, ParticipantCollectionChangedEventArgs args)
         {
             RemoveParticipant(args.Participant);
-            RefreshMsgId();
         }
 
         private void RefreshMsgId()
@@ -77,6 +80,7 @@ namespace LyncMsg
 
         private void MsgReceived(object sender, MessageSentEventArgs data)
         {
+            RefreshMsgId();
             var modality = (InstantMessageModality) sender;
             long userId = UserDb.GetDb().GetOrAddUserId(modality.Participant.Contact);
             if (userId <= 0)
@@ -94,12 +98,12 @@ namespace LyncMsg
             }
             htmlMsg = htmlMsg ?? "";
             plainMsg = plainMsg ?? "";
-            AddMessage(_dbChatId, userId, htmlMsg, plainMsg);
+            AddMessage(_dbChatId, userId, htmlMsg, plainMsg, _convId);
         }
 
-        private void AddMessage(long chatId, long userId, string htmlMsg, string plainMsg)
+        private void AddMessage(long chatId, long userId, string htmlMsg, string plainMsg, string conversationId)
         {
-            MsgDb.GetDb().AddMessage(chatId, userId, htmlMsg, plainMsg);
+            MsgDb.GetDb().AddMessage(chatId, userId, htmlMsg, plainMsg, conversationId);
             Console.WriteLine("[Chat] " + plainMsg);
         }
     }

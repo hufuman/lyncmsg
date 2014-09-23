@@ -53,7 +53,10 @@ namespace MsgDao
         public List<ChatInfo> GetChatInfo()
         {
             var result = new List<ChatInfo>();
-            const string sql = "select ChatId, UserIds from Chat";
+            const string sql = "select c.ChatId, c.UserIds from Chat c "
+                + "order by "
+                + " (select max(m.messageid) from message m where m.chatid=c.chatid)"
+                + " desc";
             using (var reader = DbUtil.ExecuteSql(LyncDb.GetDb().SqlCnn, sql, null))
             {
                 while (reader.Read())
