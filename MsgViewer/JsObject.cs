@@ -28,6 +28,7 @@ namespace MsgViewer
     {
         public long UserId { get; set; }
         public string Name { get; set; }
+        public string Uri { get; set; }
     }
 
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
@@ -35,6 +36,7 @@ namespace MsgViewer
     {
         private System.Windows.Controls.WebBrowser _browser;
         private List<MsgInfo> _listMsgInfo = null;
+        private readonly Dictionary<int, JsUser> _userData = new Dictionary<int, JsUser>();
 
         #region 辅助方法
 
@@ -75,14 +77,19 @@ namespace MsgViewer
 
         public JsUser GetUserInfo(int userId)
         {
+            JsUser result;
+            if (_userData.TryGetValue(userId, out result))
+                return result;
             var data = UserDb.GetDb().GetUserInfoById(userId);
             if (data == null)
                 return null;
-            var result = new JsUser
+            result = new JsUser
             {
                 Name = data.Name,
-                UserId = data.UserId
+                UserId = data.UserId,
+                Uri = data.Uri
             };
+            _userData.Add(userId, result);
             return result;
         }
 
@@ -96,9 +103,17 @@ namespace MsgViewer
             return UserDb.GetDb().GetSelfUserId();
         }
 
-        public void StartConversation(long userId)
+        public void StartConversation(string uri)
         {
-            ;
+            string command = "im:<" + uri + ">";
+            var proc = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = command,
+                }
+            };
+            proc.Start();
         }
 
         public bool ReloadChatInfo(string funcName)

@@ -77,7 +77,7 @@ namespace MsgDao
             }
         }
 
-        public int LoadMsg(long chatId, int pageIndex, int pageSize, ref System.Collections.Generic.List<MsgInfo> listMsgInfo)
+        public int LoadMsg(long chatId, int pageIndex, int pageSize, ref List<MsgInfo> listMsgInfo)
         {
             using (
                 var reader = DbUtil.ExecuteSql(LyncDb.GetDb().SqlCnn,
@@ -109,6 +109,8 @@ namespace MsgDao
 
         public long SearchMsgCount(string keyword, long chatId)
         {
+            if (!keyword.Contains("%"))
+                keyword = "%" + keyword + "%";
             using (
                 var reader = DbUtil.ExecuteSql(LyncDb.GetDb().SqlCnn,
                     "select count(1) from Message a where a.ChatId=@ChatId and (a.PlainMsg like @SearchData)",
@@ -149,7 +151,7 @@ namespace MsgDao
                     var data = new MsgInfo
                     {
                         MsgId = reader.GetInt64(0),
-                        Date = reader.GetDateTime(2).ToString("yyyy-MM-dd hh:mm:ss"),
+                        Date = reader.GetDateTime(2).ToString("yyyy-MM-dd HH:mm:ss"),
                         Message = reader.GetString(1),
                         UserId = reader.GetInt64(3),
                         UserName = UserDb.GetDb().GetUserInfoById(reader.GetInt64(3)).Name

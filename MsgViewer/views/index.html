@@ -50,34 +50,43 @@
       Viewer.PageIndex = 0;
       Viewer.FilterText = "";
       Viewer.FilterTimer = null;
+      Viewer.GroupChat = null;
+      Viewer.SingleChat = null;
 
       // 加载User信息
       function OnChatInfo(chat) {
         var userCount = chat.GetUserCount();
         var title = '';
+        var uri = '';
         for(var i=0;i<userCount; ++i) {
           var userId = chat.GetUserId(i);
           if(userCount ==2 && userId == Viewer.SelfUserId)
             continue;
           var userInfo = window.external.GetUserInfo(userId);
           title += userInfo.Name + ',';
+          uri = userInfo.Uri;
         }
         if(title.length > 2)
           title = title.substring(0, title.length-1);
-        addChat(chat.ChatId, userCount, title);
+        var container = $('<div style="width:100%;height:100"></div>');
+        var group = (userCount > 2) ? Viewer.GroupChat : Viewer.SingleChat;
+        addChat(container, chat.ChatId, userCount, title, uri);
+        container.appendTo(group);
       }
 
       // 添加讨论组
-      function addChat(chatId, userCount, title) {
-        var group = (userCount > 2) ? $("#groupChat") : $("#singleChat");
+      function addChat(container, chatId, userCount, title, uri) {
         var li = $('<li class="contact" title="' + title + '">' + title + '</li>');
-        li.appendTo(group);
+        li.appendTo(container);
         li.prop('chatId', chatId);
+        if(userCount == 2)
+          li.prop('uri', uri);
         li.tooltip({delay: 500});
       }
 
       // 显示消息页数
       function showPageCount() {
+        $("#curPage").text(Viewer.PageIndex);
         $("#totalPage").text(Viewer.PageCount);
       }
 
@@ -145,6 +154,10 @@
       }
 
       $(document).ready(function(){
+
+        Viewer.GroupChat = $('#groupChat');
+        Viewer.SingleChat = $('#singleChat');
+
         window.external.ReloadChatInfo('OnChatInfo');
 
         // 上一页被点击
@@ -169,23 +182,39 @@
           if(!chatId)
             return;
 
-          var filter = $('#editSearch').val();
+          var filter = $('#editSearch').val().trim();
+          var placeholder = $('#editSearch').attr('placeholder');
+          if(placeholder == filter)
+            filter = '';
           if(filter.length == 0) {
             showMsg(Viewer.PageIndex);
             return;
           }
+          var msgCount = window.external.SearchMsgCount(chatId, filter);
+          Viewer.PageIndex = 1;
+          Viewer.PageCount = 1;
+          Viewer.PageSize = msgCount;
+          showPageCount();
           var messages = $(".messages");
           messages.empty();
-          var msgCount = window.external.SearchMsgCount(chatId, filter);
-          Viewer.PageIndex = 0;
-          Viewer.PageCount = Viewer.PageSize;
-          showPageCount();
           window.external.SearchMsg('addMessage', chatId, filter, Viewer.PageIndex, Viewer.PageSize);
         });
 
-        // 
+        // 设置过滤器响应
         $("#editFilter").focus(StartFilterContacts);
         $("#editFilter").blur(StopFilterContacts);
+
+        // 联系人被双击，发起会话
+        $(".contact").dblclick(function() {
+          var uri = $(this).prop('uri');
+          if(!uri) {
+            alert('暂不支持发起多人会话');
+            return;
+          }
+          window.external.startConversation(uri);
+        })
+
+        // 显示
 
         // 联系人被点击
         $(".contact").click(function(){
@@ -199,6 +228,7 @@
           $(this).addClass("active");          
           Viewer.CurContact = this;
           Viewer.PageIndex = 0;
+          Viewer.PageSize = 10;
           var chatId = $(Viewer.CurContact).prop('chatId');
           var count = window.external.GetMsgCount(chatId);
           Viewer.PageCount = Math.ceil(count / Viewer.PageSize);
