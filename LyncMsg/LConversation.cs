@@ -66,7 +66,7 @@ namespace LyncMsg
             RemoveParticipant(args.Participant);
         }
 
-        private void RefreshMsgId()
+        private void RefreshChatId()
         {
             var userIds = new List<long>();
             foreach (var pair in _mapMsgRecHandlers)
@@ -80,7 +80,7 @@ namespace LyncMsg
 
         private void MsgReceived(object sender, MessageSentEventArgs data)
         {
-            RefreshMsgId();
+            RefreshChatId();
             var modality = (InstantMessageModality) sender;
             long userId = UserDb.GetDb().GetOrAddUserId(modality.Participant.Contact);
             if (userId <= 0)

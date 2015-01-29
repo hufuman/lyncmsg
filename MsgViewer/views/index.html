@@ -52,6 +52,8 @@
       Viewer.FilterTimer = null;
       Viewer.GroupChat = null;
       Viewer.SingleChat = null;
+      Viewer.SingleChatHtml = '';
+      Viewer.GroupChatHtml = '';
 
       // 加载User信息
       function OnChatInfo(chat) {
@@ -68,20 +70,22 @@
         }
         if(title.length > 2)
           title = title.substring(0, title.length-1);
-        var container = $('<div style="width:100%;height:100"></div>');
-        var group = (userCount > 2) ? Viewer.GroupChat : Viewer.SingleChat;
-        addChat(container, chat.ChatId, userCount, title, uri);
-        container.appendTo(group);
+
+        var chatHtml = addChat(chat.ChatId, userCount, title, uri);
+        if(userCount > 2)
+          Viewer.GroupChatHtml += chatHtml;
+        else
+          Viewer.SingleChatHtml += chatHtml;
       }
 
       // 添加讨论组
-      function addChat(container, chatId, userCount, title, uri) {
-        var li = $('<li class="contact" title="' + title + '">' + title + '</li>');
-        li.appendTo(container);
-        li.prop('chatId', chatId);
+      function addChat(chatId, userCount, title, uri) {
+        var html = '<div style="width:100%;height:100">';
+        html += '<li class="contact" title="' + title + '" data-chatId="' + chatId + '"';
         if(userCount == 2)
-          li.prop('uri', uri);
-        li.tooltip({delay: 500});
+          html += ' data-uri="' + uri + '"';
+        html += '>' + title + '</li></div>';
+        return html;
       }
 
       // 显示消息页数
@@ -94,7 +98,7 @@
       function showMsg(pageIndex) {
         var messages = $(".messages");
         messages.empty();
-        var chatId = $(Viewer.CurContact).prop('chatId');
+        var chatId = $(Viewer.CurContact).attr('data-chatId');
         if(!window.external.PrepareMsg(chatId, pageIndex, Viewer.PageSize))
           return;
         for(var i=0; i<Viewer.PageSize; ++ i) {
@@ -112,10 +116,12 @@
       // 添加消息
       function addMessage(msg) {
         var messages = $(".messages");
-        var para = '<p><span style="color: blue">';
-        para += msg.Date + '   ' + msg.UserName;
-        para += '</span><br/><span style="margin-left: 10px">';
-        para += msg.Message + '</span></p>';
+        var userLine = $('<span style="color: blue">' + msg.Date + '   ' + msg.UserName + '</span><br/>');
+        var content = msg.Message.replace(' ', '&nbsp;').replace('<','&lt;').replace('>','&gt;');
+        var msg = $('<pre style="margin-left: 10px">' + content + '</pre>');
+        var para = $('<p></p>');
+        userLine.appendTo(para);
+        msg.appendTo(para);
         messages.append(para);
       }
 
@@ -158,7 +164,10 @@
         Viewer.GroupChat = $('#groupChat');
         Viewer.SingleChat = $('#singleChat');
 
+        // 加载联系人信息
         window.external.ReloadChatInfo('OnChatInfo');
+        $(Viewer.GroupChatHtml).appendTo(Viewer.GroupChat);
+        $(Viewer.SingleChatHtml).appendTo(Viewer.SingleChat);
 
         // 上一页被点击
         $("#lastPage").click(function() {
@@ -176,18 +185,17 @@
 
         // 查找
         $("#btnSearch").click(function() {
-          if(!Viewer.CurContact)
-            return;
-          var chatId = $(Viewer.CurContact).prop('chatId');
-          if(!chatId)
-            return;
+          var chatId = 0;
+          if(Viewer.CurContact)
+            chatId = $(Viewer.CurContact).attr('data-chatId');
 
           var filter = $('#editSearch').val().trim();
           var placeholder = $('#editSearch').attr('placeholder');
           if(placeholder == filter)
             filter = '';
           if(filter.length == 0) {
-            showMsg(Viewer.PageIndex);
+            if(Viewer.CurContact)
+              showContractMsg(Viewer.CurContact);
             return;
           }
           var msgCount = window.external.SearchMsgCount(chatId, filter);
@@ -197,39 +205,25 @@
           showPageCount();
           var messages = $(".messages");
           messages.empty();
-          window.external.SearchMsg('addMessage', chatId, filter, Viewer.PageIndex, Viewer.PageSize);
+          window.external.SearchMsg('addMessage', chatId, filter, Viewer.PageIndex - 1, Viewer.PageSize);
         });
 
         // 设置过滤器响应
         $("#editFilter").focus(StartFilterContacts);
         $("#editFilter").blur(StopFilterContacts);
 
-        // 联系人被双击，发起会话
-        $(".contact").dblclick(function() {
-          var uri = $(this).prop('uri');
-          if(!uri) {
-            alert('暂不支持发起多人会话');
-            return;
-          }
-          window.external.startConversation(uri);
-        })
-
-        // 显示
-
-        // 联系人被点击
-        $(".contact").click(function(){
-          if(Viewer.CurContact == this)
-            return;
+        // 显示联系人消息
+        function showContractMsg(contact) {
           // 清空当前选择
           if(Viewer.CurContact != null)
             $(Viewer.CurContact).removeClass("active");
 
           // 选择点中项
-          $(this).addClass("active");          
-          Viewer.CurContact = this;
+          $(contact).addClass("active");          
+          Viewer.CurContact = contact;
           Viewer.PageIndex = 0;
           Viewer.PageSize = 10;
-          var chatId = $(Viewer.CurContact).prop('chatId');
+          var chatId = $(Viewer.CurContact).attr('data-chatId');
           var count = window.external.GetMsgCount(chatId);
           Viewer.PageCount = Math.ceil(count / Viewer.PageSize);
 
@@ -237,6 +231,23 @@
           showPageCount();
           // 显示消息
           showMsg(Viewer.PageCount - 1);
+        }
+
+        // 联系人被双击，发起会话
+        $(".contact").dblclick(function() {
+          var uri = $(this).data('uri');
+          if(!uri) {
+            alert('暂不支持发起多人会话');
+            return;
+          }
+          window.external.startConversation(uri);
+        });
+
+        // 联系人被点击
+        $(".contact").click(function(){
+          if(Viewer.CurContact == this)
+            return;
+          showContractMsg(this);
         });
 
       });

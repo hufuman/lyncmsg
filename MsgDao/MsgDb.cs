@@ -33,6 +33,8 @@ namespace MsgDao
             {
                 return -1;
             }
+            // Update Chat.LastTime
+            ChatDb.GetDb().UpdateLastTime(chatId);
             return LyncDb.GetDb().SqlCnn.LastInsertRowId;
         }
 
@@ -113,7 +115,7 @@ namespace MsgDao
                 keyword = "%" + keyword + "%";
             using (
                 var reader = DbUtil.ExecuteSql(LyncDb.GetDb().SqlCnn,
-                    "select count(1) from Message a where a.ChatId=@ChatId and (a.PlainMsg like @SearchData)",
+                    "select count(1) from Message a where (@ChatId=0 or a.ChatId=@ChatId) and (a.PlainMsg like @SearchData)",
                     new[]
                     {
                         DbUtil.BuildParameter("@SearchData", DbType.String, keyword),
@@ -135,7 +137,7 @@ namespace MsgDao
             var result = new List<MsgInfo>();
             using (
                 var reader = DbUtil.ExecuteSql(LyncDb.GetDb().SqlCnn,
-                    "select a.MessageId, a.PlainMsg, a.DateTime, a.UserId from Message a where a.ChatId=@ChatId and (a.PlainMsg like @SearchData) limit @FromIndex,@MsgCount",
+                    "select a.MessageId, a.PlainMsg, a.DateTime, a.UserId from Message a where (@ChatId=0 or a.ChatId=@ChatId) and (a.PlainMsg like @SearchData) limit @FromIndex,@MsgCount",
                     new[]
                     {
                         DbUtil.BuildParameter("@ChatId", DbType.Int64, chatId),

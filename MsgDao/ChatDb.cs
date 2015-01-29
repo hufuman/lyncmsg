@@ -29,10 +29,11 @@ namespace MsgDao
         public long CreateChat(IEnumerable<long> userIds)
         {
             if (!DbUtil.ExecuteSqlNoQuery(LyncDb.GetDb().SqlCnn,
-                "insert into Chat (UserIds) values (@UserIds)",
+                "insert into Chat (UserIds, LastTime) values (@UserIds, @LastTime)",
                 new[]
                 {
-                    DbUtil.BuildParameter("@UserIds", DbType.String, GetUserIds(userIds))
+                    DbUtil.BuildParameter("@UserIds", DbType.String, GetUserIds(userIds)),
+                    DbUtil.BuildParameter("@LastTime", DbType.DateTime, DateTime.Now)
                 }))
             {
                 return -1;
@@ -54,9 +55,7 @@ namespace MsgDao
         {
             var result = new List<ChatInfo>();
             const string sql = "select c.ChatId, c.UserIds from Chat c "
-                + "order by "
-                + " (select max(m.messageid) from message m where m.chatid=c.chatid)"
-                + " desc";
+                + "order by c.LastTime desc";
             using (var reader = DbUtil.ExecuteSql(LyncDb.GetDb().SqlCnn, sql, null))
             {
                 while (reader.Read())
@@ -78,6 +77,17 @@ namespace MsgDao
                 }
             }
             return result;
-        } 
+        }
+
+        internal bool UpdateLastTime(long chatId)
+        {
+            return DbUtil.ExecuteSqlNoQuery(LyncDb.GetDb().SqlCnn,
+                "Update Chat set LastTime=@LastTime where ChatId=@ChatId",
+                new[]
+                {
+                    DbUtil.BuildParameter("@LastTime", DbType.String, DateTime.Now),
+                    DbUtil.BuildParameter("@ChatId", DbType.String, chatId),
+                });
+        }
     }
 }
