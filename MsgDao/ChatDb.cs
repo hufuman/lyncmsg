@@ -33,7 +33,7 @@ namespace MsgDao
                 new[]
                 {
                     DbUtil.BuildParameter("@UserIds", DbType.String, GetUserIds(userIds)),
-                    DbUtil.BuildParameter("@LastTime", DbType.DateTime, DateTime.Now)
+                    DbUtil.BuildParameter("@LastTime", DbType.String, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"))
                 }))
             {
                 return -1;
@@ -54,7 +54,7 @@ namespace MsgDao
         public ChatInfo GetChatInfoById(long chatId)
         {
             const string sql = "select c.ChatId, c.UserIds from Chat c where c.ChatId=@ChatId";
-            using (var reader = DbUtil.ExecuteSql(LyncDb.GetDb().SqlCnn, sql, new []
+            using (var reader = DbUtil.ExecuteSql(LyncDb.GetDb().SqlCnn, sql, new[]
             {
                     DbUtil.BuildParameter("@ChatId", DbType.Int64, chatId),
             }))
@@ -113,7 +113,7 @@ namespace MsgDao
                 "Update Chat set LastTime=@LastTime where ChatId=@ChatId",
                 new[]
                 {
-                    DbUtil.BuildParameter("@LastTime", DbType.String, DateTime.Now),
+                    DbUtil.BuildParameter("@LastTime", DbType.String, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")),
                     DbUtil.BuildParameter("@ChatId", DbType.String, chatId),
                 });
         }
