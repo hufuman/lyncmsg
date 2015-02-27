@@ -59,19 +59,17 @@
       function OnChatInfo(chat) {
         var userCount = chat.GetUserCount();
         var title = '';
-        var uri = '';
         for(var i=0;i<userCount; ++i) {
           var userId = chat.GetUserId(i);
           if(userCount ==2 && userId == Viewer.SelfUserId)
             continue;
           var userInfo = window.external.GetUserInfo(userId);
           title += userInfo.Name + ',';
-          uri = userInfo.Uri;
         }
         if(title.length > 2)
           title = title.substring(0, title.length-1);
 
-        var chatHtml = addChat(chat.ChatId, userCount, title, uri);
+        var chatHtml = addChat(chat.ChatId, userCount, title);
         if(userCount > 2)
           Viewer.GroupChatHtml += chatHtml;
         else
@@ -79,11 +77,9 @@
       }
 
       // 添加讨论组
-      function addChat(chatId, userCount, title, uri) {
+      function addChat(chatId, userCount, title) {
         var html = '<div style="width:100%;height:100">';
         html += '<li class="contact" title="' + title + '" data-chatId="' + chatId + '"';
-        if(userCount == 2)
-          html += ' data-uri="' + uri + '"';
         html += '>' + title + '</li></div>';
         return html;
       }
@@ -235,12 +231,8 @@
 
         // 联系人被双击，发起会话
         $(".contact").dblclick(function() {
-          var uri = $(this).data('uri');
-          if(!uri) {
-            alert('暂不支持发起多人会话');
-            return;
-          }
-          window.external.startConversation(uri);
+          var chatId = $(this).attr('data-chatId');
+          window.external.startConversation(chatId);
         });
 
         // 联系人被点击

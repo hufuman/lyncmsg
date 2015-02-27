@@ -51,7 +51,35 @@ namespace MsgDao
             return userIdsString;
         }
 
-        public List<ChatInfo> GetChatInfo()
+        public ChatInfo GetChatInfoById(long chatId)
+        {
+            const string sql = "select c.ChatId, c.UserIds from Chat c where c.ChatId=@ChatId";
+            using (var reader = DbUtil.ExecuteSql(LyncDb.GetDb().SqlCnn, sql, new []
+            {
+                    DbUtil.BuildParameter("@ChatId", DbType.Int64, chatId),
+            }))
+            {
+                while (reader.Read())
+                {
+                    string userIds = reader.GetString(1);
+                    var data = userIds.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+                    var info = new ChatInfo
+                    {
+                        ChatId = chatId,
+                        UserIds = new List<long>()
+                    };
+                    foreach (var id in data)
+                    {
+                        if (id.Length > 0)
+                            info.UserIds.Add(Int64.Parse(id));
+                    }
+                    return info;
+                }
+            }
+            return null;
+        }
+
+        public List<ChatInfo> GetAllChatInfo()
         {
             var result = new List<ChatInfo>();
             const string sql = "select c.ChatId, c.UserIds from Chat c "
@@ -62,7 +90,7 @@ namespace MsgDao
                 {
                     long chatId = reader.GetInt64(0);
                     string userIds = reader.GetString(1);
-                    var data = userIds.Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries);
+                    var data = userIds.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                     var info = new ChatInfo
                     {
                         ChatId = chatId,
@@ -70,7 +98,7 @@ namespace MsgDao
                     };
                     foreach (var id in data)
                     {
-                        if(id.Length > 0)
+                        if (id.Length > 0)
                             info.UserIds.Add(Int64.Parse(id));
                     }
                     result.Add(info);

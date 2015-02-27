@@ -103,9 +103,20 @@ namespace MsgViewer
             return UserDb.GetDb().GetSelfUserId();
         }
 
-        public void StartConversation(string uri)
+        public void StartConversation(long chatId)
         {
-            string command = "im:<" + uri + ">";
+            var chatInfo = ChatDb.GetDb().GetChatInfoById(chatId);
+            if (chatInfo == null)
+                return;
+            string command = "im:";
+            chatInfo.UserIds.ForEach(userId =>
+            {
+                var userInfo = UserDb.GetDb().GetUserInfoById(userId);
+                if (userInfo != null)
+                {
+                    command += "<" + userInfo.Uri + ">";
+                }
+            });
             var proc = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -118,7 +129,7 @@ namespace MsgViewer
 
         public bool ReloadChatInfo(string funcName)
         {
-            var chatInfos = ChatDb.GetDb().GetChatInfo();
+            var chatInfos = ChatDb.GetDb().GetAllChatInfo();
             chatInfos.ForEach(info => _browser.InvokeScript(funcName, new JsChat
             {
                 ChatId = info.ChatId,
