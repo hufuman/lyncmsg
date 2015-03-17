@@ -53,7 +53,7 @@ namespace MsgDao
 
         public ChatInfo GetChatInfoById(long chatId)
         {
-            const string sql = "select c.ChatId, c.UserIds from Chat c where c.ChatId=@ChatId";
+            const string sql = "select c.UserIds, c.Name from Chat c where c.ChatId=@ChatId";
             using (var reader = DbUtil.ExecuteSql(LyncDb.GetDb().SqlCnn, sql, new[]
             {
                     DbUtil.BuildParameter("@ChatId", DbType.Int64, chatId),
@@ -61,10 +61,12 @@ namespace MsgDao
             {
                 while (reader.Read())
                 {
-                    string userIds = reader.GetString(1);
+                    string userIds = reader.GetString(0);
+                    string name = reader.IsDBNull(1) ? "" : reader.GetString(1);
                     var data = userIds.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                     var info = new ChatInfo
                     {
+                        Name = name,
                         ChatId = chatId,
                         UserIds = new List<long>()
                     };
@@ -82,7 +84,7 @@ namespace MsgDao
         public List<ChatInfo> GetAllChatInfo()
         {
             var result = new List<ChatInfo>();
-            const string sql = "select c.ChatId, c.UserIds from Chat c "
+            const string sql = "select c.ChatId, c.UserIds, c.Name from Chat c "
                 + "order by c.LastTime desc";
             using (var reader = DbUtil.ExecuteSql(LyncDb.GetDb().SqlCnn, sql, null))
             {
@@ -90,9 +92,11 @@ namespace MsgDao
                 {
                     long chatId = reader.GetInt64(0);
                     string userIds = reader.GetString(1);
+                    string name = reader.IsDBNull(2) ? "" : reader.GetString(2);
                     var data = userIds.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
                     var info = new ChatInfo
                     {
+                        Name = name,
                         ChatId = chatId,
                         UserIds = new List<long>()
                     };
@@ -114,6 +118,17 @@ namespace MsgDao
                 new[]
                 {
                     DbUtil.BuildParameter("@LastTime", DbType.String, DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss")),
+                    DbUtil.BuildParameter("@ChatId", DbType.String, chatId),
+                });
+        }
+
+        public bool UpdateChatName(long chatId, string name)
+        {
+            return DbUtil.ExecuteSqlNoQuery(LyncDb.GetDb().SqlCnn,
+                "Update Chat set Name=@Name where ChatId=@ChatId",
+                new[]
+                {
+                    DbUtil.BuildParameter("@Name", DbType.String, name),
                     DbUtil.BuildParameter("@ChatId", DbType.String, chatId),
                 });
         }

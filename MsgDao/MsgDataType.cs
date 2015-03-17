@@ -11,7 +11,8 @@ namespace MsgDao
     public class ChatInfo
     {
         public long ChatId { get; set; }
-        public List<long> UserIds { get; set; } 
+        public List<long> UserIds { get; set; }
+        public string Name { get; set; }
     }
 
     public class UserInfo

@@ -59,6 +59,7 @@
       function OnChatInfo(chat) {
         var userCount = chat.GetUserCount();
         var title = '';
+
         for(var i=0;i<userCount; ++i) {
           var userId = chat.GetUserId(i);
           if(userCount ==2 && userId == Viewer.SelfUserId)
@@ -69,7 +70,7 @@
         if(title.length > 2)
           title = title.substring(0, title.length-1);
 
-        var chatHtml = addChat(chat.ChatId, userCount, title);
+        var chatHtml = addChat(chat.ChatId, chat.Name, userCount, title);
         if(userCount > 2)
           Viewer.GroupChatHtml += chatHtml;
         else
@@ -77,10 +78,13 @@
       }
 
       // 添加讨论组
-      function addChat(chatId, userCount, title) {
+      function addChat(chatId, name, userCount, title) {
         var html = '<div style="width:100%;height:100">';
         html += '<li class="contact" title="' + title + '" data-chatId="' + chatId + '"';
-        html += '>' + title + '</li></div>';
+        if(name.length > 0)
+          html += ' data-name="' + unescape(name) + '"';
+        html += '>';
+        html += (name.length > 0 && name != title ? '[' + unescape(name) + '] ' : '') + title + '</li></div>';
         return html;
       }
 
@@ -240,6 +244,36 @@
           if(Viewer.CurContact == this)
             return;
           showContractMsg(this);
+        });
+
+        $(document).mousedown(function(e){
+          if(e.button == 2 ) {
+            var chat = e.target;
+            // 设置为选中
+            if(Viewer.CurContact != chat)
+              showContractMsg(chat);
+            var chatId = $(chat).attr('data-chatId');
+            if(!chatId || chatId == 0)
+              return false;
+            var name = $(chat).attr('data-name');
+            var text = $(chat).text();
+            name = (!name) ? text : name;
+            var newName = prompt('输入新的名字', name);
+            if(newName != null && newName != '' && newName != name) {
+              if(window.external.SetChatName(chatId, newName)) {
+                var text = '[' + unescape(newName) + '] ' + unescape($(chat).attr('title'));
+                $(chat).attr('data-name', newName);
+                $(chat).text(text);
+              }
+            }
+            return false;
+          } 
+          return true;
+        });
+
+        // 修改名字
+        $(document).bind('contextmenu', function(e) {
+          return false;
         });
 
       });

@@ -8,6 +8,7 @@ namespace MsgViewer
     public class JsChat
     {
         public List<long> UserIds;
+        public string Name { get; set; }
 
         public long ChatId { get; set; }
         public long GetUserId(int index)
@@ -66,6 +67,13 @@ namespace MsgViewer
             ClearMsg();
             _listMsgInfo = new List<MsgInfo>();
             return MsgDb.GetDb().LoadMsg(charId, pageIndex, pageSize, ref _listMsgInfo);
+        }
+
+        public bool SetChatName(long chatId, string name)
+        {
+            if (string.IsNullOrEmpty(name) || string.IsNullOrWhiteSpace(name))
+                name = "";
+            return ChatDb.GetDb().UpdateChatName(chatId, name);
         }
 
         public MsgInfo NextMsg(int index)
@@ -133,7 +141,8 @@ namespace MsgViewer
             chatInfos.ForEach(info => _browser.InvokeScript(funcName, new JsChat
             {
                 ChatId = info.ChatId,
-                UserIds = info.UserIds
+                UserIds = info.UserIds,
+                Name = string.IsNullOrEmpty(info.Name) ? "" : info.Name
             }));
             return true;
         }

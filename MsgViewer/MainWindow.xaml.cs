@@ -58,7 +58,8 @@ namespace MsgViewer
                             {
                                 if (wParam.ToInt32() == showLyncHotKeyId)
                                 {
-                                    ToggleLyncWindow();
+                                    // ToggleLyncWindow();
+                                    ToggleViewer();
                                     handled = true;
                                 }
                                 break;
@@ -74,10 +75,29 @@ namespace MsgViewer
             };
         }
 
+        private void ToggleViewer()
+        {
+            var wndHelper = new WindowInteropHelper(this);
+            IntPtr handle = wndHelper.Handle;
+            if (GetForegroundWindow() == handle && IsWindowVisible(handle))
+            {
+                ShowLyncWindow(false);
+                ShowWindow(handle, WindowShowStyle.SW_MINIMIZE);
+            }
+            else
+            {
+                if (IsWindowVisible(handle) && (IsIconic(handle) || GetForegroundWindow() != handle))
+                    SwitchToThisWindow(handle, true);
+                else
+                    ShowWindow(handle, WindowShowStyle.SW_SHOW);
+            }
+        }
+
         internal enum WindowShowStyle : uint
         {
             SW_HIDE = 0,
-            SW_SHOW = 5
+            SW_SHOW = 5,
+            SW_MINIMIZE = 6
         }
         [DllImport("user32.DLL")]
         public static extern IntPtr FindWindow(string lpszClass, string lpszWindow);
@@ -101,6 +121,25 @@ namespace MsgViewer
             ModifierKeys fsModifiers,
             int vk
             );
+
+        private void ShowLyncWindow(bool show)
+        {
+            IntPtr handle = FindWindow("CommunicatorMainWindowClass", null);
+            if (handle == IntPtr.Zero)
+                return;
+
+            if (show)
+            {
+                if (IsWindowVisible(handle) && (IsIconic(handle) || GetForegroundWindow() != handle))
+                    SwitchToThisWindow(handle, true);
+                else
+                    ShowWindow(handle, WindowShowStyle.SW_SHOW);
+            }
+            else
+            {
+                ShowWindow(handle, WindowShowStyle.SW_HIDE);
+            }
+        }
 
         private void ToggleLyncWindow()
         {
