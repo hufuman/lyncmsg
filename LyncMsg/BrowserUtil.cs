@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
-namespace MsgViewer
+namespace LyncMsg
 {
     public enum INTERNETFEATURELIST
     {

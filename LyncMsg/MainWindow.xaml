@@ -1,8 +1,8 @@
-﻿<Window x:Class="MsgViewer.MainWindow"
+﻿<Window x:Class="LyncMsg.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:msgViewer="clr-namespace:MsgViewer"
-        Title="LyncMsg" Height="600" Width="800" Icon="/MsgViewer;component/Images/lyncmsg.ico">
+        xmlns:lyncMsg="clr-namespace:LyncMsg"
+        Title="LyncMsg" Height="600" Width="800" Icon="/LyncMsg;component/Images/lyncmsg.ico">
     <Grid>
         <WebBrowser Grid.Row="0" HorizontalAlignment="Stretch" Name="WebMessages" VerticalAlignment="Stretch" />
     </Grid>

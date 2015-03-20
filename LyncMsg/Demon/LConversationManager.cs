@@ -1,19 +1,22 @@
 ﻿using System.Collections.Generic;
 using Microsoft.Lync.Model.Conversation;
 
-namespace LyncMsg
+namespace LyncMsg.Demon
 {
     class LConversationManager
     {
         private readonly Dictionary<Conversation, LConversation> _mapConversations = new Dictionary<Conversation, LConversation>();
 
-        public void Init(ConversationManager conversationManager)
+        private LConversation.MessageDelegate _messageDelegate;
+
+        public void Init(ConversationManager conversationManager, LConversation.MessageDelegate messageDelegate)
         {
+            _messageDelegate = messageDelegate;
             int count = conversationManager.Conversations.Count;
             for (int i = 0; i < count; ++i)
             {
                 Conversation conversation = conversationManager.Conversations[i];
-                var lconversation = new LConversation(conversation);
+                var lconversation = new LConversation(conversation, _messageDelegate);
                 _mapConversations.Add(conversation, lconversation);
             }
 
@@ -23,7 +26,7 @@ namespace LyncMsg
 
         private void ConversationAdded(object sender, ConversationManagerEventArgs args)
         {
-            var lconversation = new LConversation(args.Conversation);
+            var lconversation = new LConversation(args.Conversation, _messageDelegate);
             _mapConversations.Add(args.Conversation, lconversation);
         }
 

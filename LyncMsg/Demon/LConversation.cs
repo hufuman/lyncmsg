@@ -1,18 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Microsoft.Lync.Model.Conversation;
 using MsgDao;
 
-namespace LyncMsg
+namespace LyncMsg.Demon
 {
     class LConversation
     {
-        private string _convId;
+        private readonly string _convId;
         private long _dbChatId;
         private readonly Dictionary<string, UserInfo> _mapMsgRecHandlers = new Dictionary<string, UserInfo>();
 
-        public LConversation(Conversation conversation)
+        public delegate void MessageDelegate(long chatId, long userId, string htmlMsg, string plainMsg);
+
+        private readonly MessageDelegate _msgDelegate;
+
+        public LConversation(Conversation conversation, MessageDelegate messageDelegate)
         {
+            _msgDelegate = messageDelegate;
             object idValue;
             if (conversation.Properties.TryGetValue(ConversationProperty.Id, out idValue))
                 _convId = (string)idValue;
@@ -81,7 +85,7 @@ namespace LyncMsg
         private void MsgReceived(object sender, MessageSentEventArgs data)
         {
             RefreshChatId();
-            var modality = (InstantMessageModality) sender;
+            var modality = (InstantMessageModality)sender;
             long userId = UserDb.GetDb().GetOrAddUserId(modality.Participant.Contact);
             if (userId <= 0)
                 return;
@@ -104,7 +108,8 @@ namespace LyncMsg
         private void AddMessage(long chatId, long userId, string htmlMsg, string plainMsg, string conversationId)
         {
             MsgDb.GetDb().AddMessage(chatId, userId, htmlMsg, plainMsg, conversationId);
-            Console.WriteLine("[Chat] " + plainMsg);
+            if (_msgDelegate != null)
+                _msgDelegate(chatId, userId, htmlMsg, plainMsg);
         }
     }
 }

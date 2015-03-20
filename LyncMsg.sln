@@ -1,9 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LyncMsg", "LyncMsg\LyncMsg.csproj", "{F35CC999-2D4B-409F-9F77-A6ACD85110A7}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MsgViewer", "MsgViewer\MsgViewer.csproj", "{2FE797FF-25F8-429A-AE3D-677AC33292DB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LyncMsg", "LyncMsg\LyncMsg.csproj", "{2FE797FF-25F8-429A-AE3D-677AC33292DB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MsgDao", "MsgDao\MsgDao.csproj", "{90EC78EC-1FBB-4282-90B7-E125990809AC}"
 EndProject
@@ -17,16 +15,6 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{F35CC999-2D4B-409F-9F77-A6ACD85110A7}.Debug|Any CPU.ActiveCfg = Debug|x86
-		{F35CC999-2D4B-409F-9F77-A6ACD85110A7}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
-		{F35CC999-2D4B-409F-9F77-A6ACD85110A7}.Debug|Mixed Platforms.Build.0 = Debug|x86
-		{F35CC999-2D4B-409F-9F77-A6ACD85110A7}.Debug|x86.ActiveCfg = Debug|x86
-		{F35CC999-2D4B-409F-9F77-A6ACD85110A7}.Debug|x86.Build.0 = Debug|x86
-		{F35CC999-2D4B-409F-9F77-A6ACD85110A7}.Release|Any CPU.ActiveCfg = Release|x86
-		{F35CC999-2D4B-409F-9F77-A6ACD85110A7}.Release|Mixed Platforms.ActiveCfg = Release|x86
-		{F35CC999-2D4B-409F-9F77-A6ACD85110A7}.Release|Mixed Platforms.Build.0 = Release|x86
-		{F35CC999-2D4B-409F-9F77-A6ACD85110A7}.Release|x86.ActiveCfg = Release|x86
-		{F35CC999-2D4B-409F-9F77-A6ACD85110A7}.Release|x86.Build.0 = Release|x86
 		{2FE797FF-25F8-429A-AE3D-677AC33292DB}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{2FE797FF-25F8-429A-AE3D-677AC33292DB}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
 		{2FE797FF-25F8-429A-AE3D-677AC33292DB}.Debug|Mixed Platforms.Build.0 = Debug|x86
