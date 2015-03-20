@@ -65,7 +65,7 @@
           if(userCount ==2 && userId == Viewer.SelfUserId)
             continue;
           var userInfo = window.external.GetUserInfo(userId);
-          title += userInfo.Name + ',';
+          title += userInfo.Name.replace(/\(.*?\)/, '') + ',';
         }
         if(title.length > 2)
           title = title.substring(0, title.length-1);
@@ -116,7 +116,7 @@
       // 添加消息
       function addMessage(msg) {
         var messages = $(".messages");
-        var userLine = $('<span style="color: blue">' + msg.Date + '   ' + msg.UserName + '</span><br/>');
+        var userLine = $('<span style="color: blue">' + msg.Date + '   ' + msg.UserName.replace(/\(.*?\)/, '') + '</span><br/>');
         var content = msg.Message.replace(' ', '&nbsp;').replace('<','&lt;').replace('>','&gt;');
         var msg = $('<pre style="margin-left: 10px">' + content + '</pre>');
         var para = $('<p></p>');

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Runtime.InteropServices;
+using System.Text;
 using System.Windows.Input;
 
 namespace LyncMsg
@@ -14,6 +15,10 @@ namespace LyncMsg
         }
         [DllImport("user32.DLL")]
         public static extern IntPtr FindWindow(string lpszClass, string lpszWindow);
+        [DllImport("user32.DLL")]
+        public static extern IntPtr FindWindowEx(IntPtr hWndParent, IntPtr hWndChildAfter, string lpszClass, string lpszWindow);
+        [DllImport("user32.dll", SetLastError = true, CharSet = CharSet.Auto)]
+        public static extern int GetClassName(IntPtr hWnd, StringBuilder lpClassName, int nMaxCount);
         [DllImport("User32.dll")]
         public static extern IntPtr GetForegroundWindow();
         [DllImport("user32.dll")]

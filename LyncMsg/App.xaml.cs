@@ -1,10 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Data;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading;
+using System.Text;
 using System.Windows;
 
 namespace LyncMsg
@@ -14,24 +9,33 @@ namespace LyncMsg
     /// </summary>
     public partial class App : Application
     {
-        [DllImport("user32.DLL")]
-        public static extern IntPtr FindWindow(string lpszClass, string lpszWindow);
-
         protected override void OnStartup(StartupEventArgs e)
         {
-            IntPtr handle = FindWindow(null, "LyncMsg");
-            if (handle.ToInt64() == 0)
+            var handle = IntPtr.Zero;
+            var className = new StringBuilder(1024);
+            for(;;)
+            {
+                handle = WinApi.FindWindowEx(IntPtr.Zero, handle, null, "LyncMsg");
+                if (handle == IntPtr.Zero)
+                    break;
+
+                if (WinApi.GetClassName(handle, className, 1024) <= 0)
+                    continue;
+
+                if (className.ToString().IndexOf("[LyncMsg.exe") >= 0)
+                    break;
+            }
+
+            if (handle == IntPtr.Zero)
             {
                 base.OnStartup(e);
+                return;
             }
+            if (WinApi.IsWindowVisible(handle) && (WinApi.IsIconic(handle) || WinApi.GetForegroundWindow() != handle))
+                WinApi.SwitchToThisWindow(handle, true);
             else
-            {
-                if (WinApi.IsWindowVisible(handle) && (WinApi.IsIconic(handle) || WinApi.GetForegroundWindow() != handle))
-                    WinApi.SwitchToThisWindow(handle, true);
-                else
-                    WinApi.ShowWindow(handle, WinApi.WindowShowStyle.SwShow);
-                Application.Current.Shutdown();
-            }
+                WinApi.ShowWindow(handle, WinApi.WindowShowStyle.SwShow);
+            Current.Shutdown();
         }
     }
 }
