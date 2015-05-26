@@ -47,7 +47,7 @@ namespace LyncMsg
             _timer.Tick += (sender, args) =>
             {
                 ++ _tickCount;
-                if (_tickCount >= 3)
+                if (_tickCount >= 6)
                     Close();
             };
             _timer.Start();

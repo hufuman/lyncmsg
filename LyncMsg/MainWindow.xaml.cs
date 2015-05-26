@@ -104,6 +104,7 @@ namespace LyncMsg
             }
             else
             {
+                _browserObject.CallOnShow();
                 if (WinApi.IsWindowVisible(handle) && (WinApi.IsIconic(handle) || WinApi.GetForegroundWindow() != handle))
                     WinApi.SwitchToThisWindow(handle, true);
                 else

@@ -36,8 +36,9 @@ namespace LyncMsg
     public class JsObject
     {
         private System.Windows.Controls.WebBrowser _browser;
-        private List<MsgInfo> _listMsgInfo = null;
+        private List<MsgInfo> _listMsgInfo;
         private readonly Dictionary<int, JsUser> _userData = new Dictionary<int, JsUser>();
+        private string _onShowCallbackName = "";
 
         #region 辅助方法
 
@@ -111,20 +112,35 @@ namespace LyncMsg
             return UserDb.GetDb().GetSelfUserId();
         }
 
+        /// <summary>
+        /// http://thelync.net/2011/04/05/html-url-tag-syntax-to-im-and-call-in-lync-and-ocs/
+        /// </summary>
+        /// <param name="chatId"></param>
         public void StartConversation(long chatId)
         {
             var chatInfo = ChatDb.GetDb().GetChatInfoById(chatId);
             if (chatInfo == null)
                 return;
-            string command = "im:";
-            chatInfo.UserIds.ForEach(userId =>
+            long selfUserId = GetSelfUserId();
+            chatInfo.UserIds.RemoveAll(userId => userId == selfUserId);
+            string command = "";
+            if (chatInfo.UserIds.Count > 1)
             {
-                var userInfo = UserDb.GetDb().GetUserInfoById(userId);
-                if (userInfo != null)
+                command = "im:";
+                chatInfo.UserIds.ForEach(userId =>
                 {
-                    command += "<" + userInfo.Uri + ">";
-                }
-            });
+                    var userInfo = UserDb.GetDb().GetUserInfoById(userId);
+                    if (userInfo != null)
+                    {
+                        command += "<" + userInfo.Uri + ">";
+                    }
+                });
+            }
+            else
+            {
+                var userInfo = UserDb.GetDb().GetUserInfoById(chatInfo.UserIds[0]);
+                command = userInfo.Uri;
+            }
             var proc = new Process
             {
                 StartInfo = new ProcessStartInfo
@@ -133,6 +149,16 @@ namespace LyncMsg
                 }
             };
             proc.Start();
+        }
+
+        public void CallOnShow()
+        {
+            _browser.InvokeScript(_onShowCallbackName, null);
+        }
+
+        public void SetOnShowCallback(string funcName)
+        {
+            _onShowCallbackName = funcName;
         }
 
         public bool ReloadChatInfo(string funcName)

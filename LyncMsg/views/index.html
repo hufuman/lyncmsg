@@ -55,6 +55,17 @@
       Viewer.SingleChatHtml = '';
       Viewer.GroupChatHtml = '';
 
+      window.external.SetOnShowCallback('onShowWindow');
+
+      // 窗口显示
+      function onShowWindow() {
+        setTimeout(function() {
+          var editFilter = document.getElementById('editFilter');
+          editFilter.focus();
+          editFilter.select();
+        }, 100);
+      }
+
       // 加载User信息
       function OnChatInfo(chat) {
         var userCount = chat.GetUserCount();
@@ -149,6 +160,7 @@
 
         var messages = $(".messages");
         messages.empty();
+        Viewer.CurContact = null;
         $('.contact').each(function() {
           $(this).removeClass("active");
           var title = $(this).text();
@@ -159,7 +171,49 @@
         });
       }
 
+      // 
+      function searchMsg() {
+          var chatId = 0;
+          if(Viewer.CurContact)
+            chatId = $(Viewer.CurContact).attr('data-chatId');
+
+          var filter = $('#editSearch').val().trim();
+          var placeholder = $('#editSearch').attr('placeholder');
+          if(placeholder == filter)
+            filter = '';
+          if(filter.length == 0) {
+            if(Viewer.CurContact)
+              showContractMsg(Viewer.CurContact);
+            return;
+          }
+          var msgCount = window.external.SearchMsgCount(chatId, filter);
+          Viewer.PageIndex = 1;
+          Viewer.PageCount = 1;
+          Viewer.PageSize = msgCount;
+          showPageCount();
+          var messages = $(".messages");
+          messages.empty();
+          window.external.SearchMsg('addMessage', chatId, filter, Viewer.PageIndex - 1, Viewer.PageSize);
+      }
+
       $(document).ready(function(){
+
+        $(document.body).keyup(function(event) {
+          if(event.which != 13)
+            return;
+
+          // open selected contract, or the first contract in singleGroup
+          var chatId = null;
+          if(Viewer.CurContact) {
+            chatId = $(Viewer.CurContact).attr('data-chatId');
+          } else {
+            var firstChild = $(Viewer.SingleChat).find('div li:first-child')[0];
+            showContractMsg(firstChild);
+            chatId = $(firstChild).attr('data-chatId');
+          }
+          if(chatId)
+            window.external.startConversation(chatId);
+        });
 
         Viewer.GroupChat = $('#groupChat');
         Viewer.SingleChat = $('#singleChat');
@@ -185,27 +239,7 @@
 
         // 查找
         $("#btnSearch").click(function() {
-          var chatId = 0;
-          if(Viewer.CurContact)
-            chatId = $(Viewer.CurContact).attr('data-chatId');
-
-          var filter = $('#editSearch').val().trim();
-          var placeholder = $('#editSearch').attr('placeholder');
-          if(placeholder == filter)
-            filter = '';
-          if(filter.length == 0) {
-            if(Viewer.CurContact)
-              showContractMsg(Viewer.CurContact);
-            return;
-          }
-          var msgCount = window.external.SearchMsgCount(chatId, filter);
-          Viewer.PageIndex = 1;
-          Viewer.PageCount = 1;
-          Viewer.PageSize = msgCount;
-          showPageCount();
-          var messages = $(".messages");
-          messages.empty();
-          window.external.SearchMsg('addMessage', chatId, filter, Viewer.PageIndex - 1, Viewer.PageSize);
+          searchMsg();
         });
 
         // 设置过滤器响应
@@ -246,7 +280,7 @@
           showContractMsg(this);
         });
 
-        $(document).mousedown(function(e){
+        $(".contact").mousedown(function(e){
           if(e.button == 2 ) {
             var chat = e.target;
             // 设置为选中
@@ -272,7 +306,7 @@
         });
 
         // 修改名字
-        $(document).bind('contextmenu', function(e) {
+        $(".contact").bind('contextmenu', function(e) {
           return false;
         });
 
