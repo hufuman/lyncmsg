@@ -1,4 +1,7 @@
 ﻿using System.Collections.Generic;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Web;
 using Microsoft.Lync.Model.Conversation;
 using MsgDao;
 
@@ -89,6 +92,7 @@ namespace LyncMsg.Demon
             long userId = UserDb.GetDb().GetOrAddUserId(modality.Participant.Contact);
             if (userId <= 0)
                 return;
+
             string plainMsg;
             if (!data.Contents.TryGetValue(InstantMessageContentType.PlainText, out plainMsg))
             {
@@ -96,13 +100,36 @@ namespace LyncMsg.Demon
             }
 
             string htmlMsg;
-            if (!data.Contents.TryGetValue(InstantMessageContentType.Html, out htmlMsg))
-            {
-                htmlMsg = plainMsg;
-            }
+            data.Contents.TryGetValue(InstantMessageContentType.Html, out htmlMsg);
+
             htmlMsg = htmlMsg ?? "";
             plainMsg = plainMsg ?? "";
+
+            if (!string.IsNullOrEmpty(htmlMsg))
+            {
+                plainMsg = HtmlMsg2PlainMsg(htmlMsg);
+            }
+
             AddMessage(_dbChatId, userId, htmlMsg, plainMsg, _convId);
+        }
+
+        /// <summary> 
+        /// 去除HTML内容且P标签转换为换行 
+        /// </summary> 
+        /// <param name="htmlString"></param> 
+        /// <returns></returns> 
+        private static string HtmlMsg2PlainMsg(string htmlString)
+        {
+            if (string.IsNullOrEmpty(htmlString))
+                return string.Empty;
+            string planMsg = HttpUtility.HtmlDecode(htmlString);
+            planMsg = Regex.Replace(planMsg, "<br\\s*/?>", "\n", RegexOptions.IgnoreCase);
+            planMsg = Regex.Replace(planMsg, "</p\\s*>", "\n", RegexOptions.IgnoreCase);
+            planMsg = Regex.Replace(planMsg, @"&(nbsp|#160);", " ", RegexOptions.IgnoreCase);
+            planMsg = Regex.Replace(planMsg, "<(.[^>]*)>", "", RegexOptions.IgnoreCase);
+            planMsg = Regex.Replace(planMsg, "\n\n+", "\n\n", RegexOptions.ECMAScript);
+            planMsg = HttpUtility.UrlDecode(planMsg, Encoding.UTF8);
+            return planMsg;
         }
 
         private void AddMessage(long chatId, long userId, string htmlMsg, string plainMsg, string conversationId)

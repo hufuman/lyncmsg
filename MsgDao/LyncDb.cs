@@ -42,6 +42,14 @@ namespace MsgDao
                 && DbUtil.ExecuteSqlNoQuery(SqlCnn, userSql, null);
         }
 
+        public static string GetAppDataPath(string subPath)
+        {
+            string filePath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+            filePath += "\\" + subPath;
+            filePath = filePath.Replace("\\\\", "\\");
+            return filePath;
+        }
+
         private string GetMsgDbPath()
         {
             string filePath = FileUtil.GetAppDataPath("LyncMsg\\MsgDb.db");
