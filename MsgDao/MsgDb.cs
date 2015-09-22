@@ -42,7 +42,7 @@ namespace MsgDao
         {
             using (
                 var reader = DbUtil.ExecuteSql(LyncDb.GetDb().SqlCnn,
-                    "select MessageId, PlainMsg, DateTime, UserId from Message where ChatId=@ChatId and MessageId > @MsgId limit 1",
+                    "select MessageId, PlainMsg, DateTime, UserId, ChatId from Message where ChatId=@ChatId and MessageId > @MsgId limit 1",
                     new[]
                     {
                         DbUtil.BuildParameter("@MsgId", DbType.Int64, msgId),
@@ -57,7 +57,8 @@ namespace MsgDao
                     Date = reader.GetDateTime(2).ToString("yyyy-MM-dd hh:mm:ss"),
                     Message = reader.GetString(1),
                     UserId = reader.GetInt64(3),
-                    UserName = UserDb.GetDb().GetUserInfoById(reader.GetInt64(3)).Name
+                    UserName = UserDb.GetDb().GetUserInfoById(reader.GetInt64(3)).Name,
+                    ChatId = reader.GetInt64(4)
                 };
                 return result;
             }
@@ -83,7 +84,7 @@ namespace MsgDao
         {
             using (
                 var reader = DbUtil.ExecuteSql(LyncDb.GetDb().SqlCnn,
-                    "select a.MessageId, a.PlainMsg, a.DateTime, a.UserId from message a where a.ChatId=@ChatId and a.Messageid not in (select b.messageid from message b where b.ChatId=@ChatId limit @OverCount) limit @PageSize",
+                    "select a.MessageId, a.PlainMsg, a.DateTime, a.UserId, a.ChatId from message a where a.ChatId=@ChatId and a.Messageid not in (select b.messageid from message b where b.ChatId=@ChatId limit @OverCount) limit @PageSize",
                     new[]
                     {
                         DbUtil.BuildParameter("@OverCount", DbType.Int32, pageSize * pageIndex),
@@ -101,7 +102,8 @@ namespace MsgDao
                         Date = reader.GetDateTime(2).ToString("yyyy-MM-dd HH:mm:ss"),
                         Message = reader.GetString(1),
                         UserId = reader.GetInt64(3),
-                        UserName = UserDb.GetDb().GetUserInfoById(reader.GetInt64(3)).Name
+                        UserName = UserDb.GetDb().GetUserInfoById(reader.GetInt64(3)).Name,
+                        ChatId = reader.GetInt64(4)
                     };
                     listMsgInfo.Add(result);
                 } while (reader.Read());
@@ -137,7 +139,7 @@ namespace MsgDao
             var result = new List<MsgInfo>();
             using (
                 var reader = DbUtil.ExecuteSql(LyncDb.GetDb().SqlCnn,
-                    "select a.MessageId, a.PlainMsg, a.DateTime, a.UserId from Message a where (@ChatId=0 or a.ChatId=@ChatId) and (a.PlainMsg like @SearchData) limit @FromIndex,@MsgCount",
+                    "select a.MessageId, a.PlainMsg, a.DateTime, a.UserId, a.ChatId from Message a where (@ChatId=0 or a.ChatId=@ChatId) and (a.PlainMsg like @SearchData) limit @FromIndex,@MsgCount",
                     new[]
                     {
                         DbUtil.BuildParameter("@ChatId", DbType.Int64, chatId),
@@ -156,7 +158,8 @@ namespace MsgDao
                         Date = reader.GetDateTime(2).ToString("yyyy-MM-dd HH:mm:ss"),
                         Message = reader.GetString(1),
                         UserId = reader.GetInt64(3),
-                        UserName = UserDb.GetDb().GetUserInfoById(reader.GetInt64(3)).Name
+                        UserName = UserDb.GetDb().GetUserInfoById(reader.GetInt64(3)).Name,
+                        ChatId = reader.GetInt64(4)
                     };
                     result.Add(data);
                 } while (reader.Read());
