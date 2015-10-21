@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Input;
 
-namespace LyncMsg
+namespace LyncMsg.Util
 {
     public static class WinApi
     {

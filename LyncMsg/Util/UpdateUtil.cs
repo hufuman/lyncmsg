@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using System.Collections.Generic;
+using System.Runtime.Remoting.Messaging;
+using Newtonsoft.Json;
 using System;
 using System.IO;
 using System.Net;
@@ -8,11 +10,18 @@ namespace LyncMsg.Util
 {
     static class UpdateUtil
     {
-        public static string GetData(string url)
+        public static string GetData(string url, Dictionary<string, string> headers)
         {
             try
             {
                 var client = new WebClient();
+                if (headers != null && headers.Count > 0)
+                {
+                    foreach (var header in headers)
+                    {
+                        client.Headers.Add(header.Key, header.Value);
+                    }
+                }
                 var byDatas = client.DownloadData(url);
                 var result = Encoding.UTF8.GetString(byDatas);
                 return result;

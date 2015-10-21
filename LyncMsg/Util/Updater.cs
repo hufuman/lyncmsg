@@ -1,4 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Net;
+using Microsoft.Lync.Model;
+using MsgDao;
 
 namespace LyncMsg.Util
 {
@@ -37,15 +42,23 @@ namespace LyncMsg.Util
 
         private bool DoUpdate(Action<ConfigData> callback)
         {
+            // 0. prepare headers
+            var dictHeaders = new Dictionary<string, string>
+            {
+                {"XHostName", Dns.GetHostName()},
+                {"XClientVersion", LClient.GetClient().GetVersion()},
+                {"XAppVersion", ConfigurationManager.AppSettings["AppVersion"]},
+            };
+
             // 1. check if there is update
             string updateData;
             try
             {
-                updateData = UpdateUtil.GetData("http://DST57335:5388/lyncUpdate");
+                updateData = UpdateUtil.GetData("http://DST57335:5388/lyncUpdate", dictHeaders);
             }
             catch (Exception)
             {
-                updateData = UpdateUtil.GetData("http://DST61421:5388/lyncUpdate");
+                updateData = UpdateUtil.GetData("http://DST61421:5388/lyncUpdate", dictHeaders);
             }
             if (string.IsNullOrEmpty(updateData))
                 return false;

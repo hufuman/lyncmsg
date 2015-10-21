@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Reflection;
 using Microsoft.Lync.Model;
 
 namespace MsgDao
@@ -19,6 +16,16 @@ namespace MsgDao
         static public LClient GetClient()
         {
             return ClientInstance;
+        }
+
+        public string GetVersion()
+        {
+            var field = typeof(LyncClient).GetField("s_office_integration_version",
+                BindingFlags.NonPublic | BindingFlags.GetField | BindingFlags.ExactBinding | BindingFlags.Static);
+            if (field == null)
+                return "";
+            var version = (string)field.GetValue(_lyncClient);
+            return version ?? "";
         }
 
         public LyncClient LyncClient

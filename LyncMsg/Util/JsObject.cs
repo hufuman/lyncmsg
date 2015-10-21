@@ -2,7 +2,7 @@
 using MsgDao;
 using System.Collections.Generic;
 
-namespace LyncMsg
+namespace LyncMsg.Util
 {
     [System.Runtime.InteropServices.ComVisibleAttribute(true)]
     public class JsChat

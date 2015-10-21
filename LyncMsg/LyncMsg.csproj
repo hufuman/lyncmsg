@@ -38,7 +38,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup>
-    <ApplicationIcon>lyncmsg.ico</ApplicationIcon>
+    <ApplicationIcon>
+    </ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="Microsoft.Lync.Model, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
@@ -50,6 +51,7 @@
       <HintPath>..\Reference\Newtonsoft.Json.dll</HintPath>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Data" />
     <Reference Include="System.Web" />
     <Reference Include="System.Xml" />
@@ -70,7 +72,7 @@
     </ApplicationDefinition>
     <Compile Include="Util\Updater.cs" />
     <Compile Include="Util\UpdateUtil.cs" />
-    <Compile Include="WinApi.cs" />
+    <Compile Include="Util\WinApi.cs" />
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -81,8 +83,8 @@
     </Compile>
     <Compile Include="Demon\LConversation.cs" />
     <Compile Include="Demon\LConversationManager.cs" />
-    <Compile Include="JsObject.cs" />
-    <Compile Include="BrowserUtil.cs" />
+    <Compile Include="Util\JsObject.cs" />
+    <Compile Include="Util\BrowserUtil.cs" />
     <Compile Include="MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -125,9 +127,6 @@
       <Project>{90EC78EC-1FBB-4282-90B7-E125990809AC}</Project>
       <Name>MsgDao</Name>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="lyncmsg.ico" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\lyncmsg.ico" />
