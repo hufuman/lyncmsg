@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.Windows;
+using LyncMsg.Util;
 
 namespace LyncMsg
 {

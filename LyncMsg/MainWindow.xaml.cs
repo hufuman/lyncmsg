@@ -1,8 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
+using System.Timers;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Interop;
+using LyncMsg.Util;
 using MsgDao;
 using LyncMsg.Demon;
 
@@ -18,8 +21,17 @@ namespace LyncMsg
         private const int WmHotKey = 0x312;
         private int _showLyncHotKeyId;
         private readonly int _showTipWndMsg = WinApi.RegisterWindowMessage("showTipWndMsg");
+        private readonly int _showUpdateWndMsg = WinApi.RegisterWindowMessage("showUpdateWndMsg");
         private readonly MsgTipWnd _msgTipWnd = new MsgTipWnd();
         private IntPtr _mainWndPtr;
+        private Updater.ConfigData _updateData;
+        private readonly Timer _updateTimer = new Timer
+        {
+            Interval = 1000 * 60 * 10,  // update interval
+            AutoReset = true,
+            Enabled = true
+        };
+
         public MainWindow()
         {
             InitializeComponent();
@@ -77,6 +89,11 @@ namespace LyncMsg
                     {
                         _msgTipWnd.ShowTip();
                     }
+                    else if (msg == _showUpdateWndMsg)
+                    {
+                        ShowUpdate();
+                        _updateTimer.Enabled = true;
+                    }
 
                     return IntPtr.Zero;
                 });
@@ -84,6 +101,41 @@ namespace LyncMsg
                 _showLyncHotKeyId = WinApi.GlobalAddAtom("ShowLyncHotKey");
                 // Ctrl+Alt+X
                 WinApi.RegisterHotKey(wndHelper.Handle, _showLyncHotKeyId, ModifierKeys.Control | ModifierKeys.Alt, 88);
+
+                CheckUpdate();
+            };
+        }
+
+        private void ShowUpdate()
+        {
+            var msg = "New Version Available\r\nClick yes to see what's new";
+            if (!string.IsNullOrEmpty(_updateData.Msg))
+            {
+                msg += "\r\n\r\n";
+                msg += _updateData.Msg;
+            }
+            MessageBoxResult result = MessageBox.Show(this, msg, "LyncMsg", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            if (result == MessageBoxResult.Yes)
+            {
+                Process.Start(_updateData.UpdateUrl);
+            }
+        }
+
+        private void CheckUpdate()
+        {
+            _updateTimer.Elapsed += (sender, args) =>
+            {
+                bool needTimer = true;
+                _updateTimer.Enabled = false;
+                var updater = new Updater();
+                updater.Update(data =>
+                {
+                    needTimer = false;
+                    _updateData = data;
+                    WinApi.PostMessage(_mainWndPtr, _showUpdateWndMsg, (IntPtr)0, (IntPtr)0);
+                });
+                if (needTimer)
+                    _updateTimer.Enabled = true;
             };
         }
 
