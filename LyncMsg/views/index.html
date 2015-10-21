@@ -164,15 +164,24 @@
 
         var messages = $(".messages");
         messages.empty();
-        Viewer.CurContact = null;
+        var curContract = null;
         $('.contact').each(function() {
-          $(this).removeClass("active");
+          if(curContract == null) {
+            curContract = $(this);
+            $(this).addClass("active");
+          } else {
+            $(this).removeClass("active");
+          }
           var title = $(this).text();
           if(title.toLocaleLowerCase().indexOf(lowerFilter) >= 0)
             $(this).show();
           else
             $(this).hide();
         });
+        if(curContract != null && curContract != Viewer.CurContact)
+          showContractMsg(curContract);
+        else
+          Viewer.CurContact = curContract;
       }
 
       // 
