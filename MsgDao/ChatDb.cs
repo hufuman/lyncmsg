@@ -88,6 +88,8 @@ namespace MsgDao
                 + "order by c.LastTime desc";
             using (var reader = DbUtil.ExecuteSql(LyncDb.GetDb().SqlCnn, sql, null))
             {
+                if (reader == null)
+                    return result;
                 while (reader.Read())
                 {
                     long chatId = reader.GetInt64(0);

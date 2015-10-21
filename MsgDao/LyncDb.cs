@@ -32,7 +32,7 @@ namespace MsgDao
         private bool EnsureTables()
         {
             const string chatSql =
-                "CREATE TABLE if not exists [Chat] ( [ChatId] integer PRIMARY KEY AUTOINCREMENT NOT NULL, [UserIds] nvarchar(1000) NOT NULL)";
+                "CREATE TABLE if not exists [Chat] ( [ChatId] integer PRIMARY KEY AUTOINCREMENT NOT NULL, [UserIds] nvarchar(1000) NOT NULL, [LastTime] TIMESTAMP DEFAULT (datetime('now', 'localtime')), [Name] nvarchar(200) COLLATE NOCASE)";
             const string msgSql =
                 "CREATE TABLE if not exists [Message] ( [MessageId] integer PRIMARY KEY AUTOINCREMENT NOT NULL, [HtmlMsg] ntext NOT NULL, [PlainMsg] ntext NOT NULL, [Data] ntext, [DateTime] TIMESTAMP default (datetime('now', 'localtime')), [Type] smallint NOT NULL, [ChatId] bigint NOT NULL, [UserId] bigint NOT NULL, [LyncConvId] ntext)";
             const string userSql =
