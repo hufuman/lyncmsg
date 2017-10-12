@@ -55,6 +55,7 @@ namespace LyncMsg
             }
 
             var conversationManager = new LConversationManager();
+            LClient.GetClient().Init();
             conversationManager.Init(LClient.GetClient().LyncClient.ConversationManager, OnMsgArrived);
 
             WebMessages.Navigate(new Uri(url, UriKind.RelativeOrAbsolute));

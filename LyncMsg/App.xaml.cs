@@ -2,6 +2,7 @@
 using System.Text;
 using System.Windows;
 using LyncMsg.Util;
+using MsgDao;
 
 namespace LyncMsg
 {
@@ -32,6 +33,14 @@ namespace LyncMsg
                 base.OnStartup(e);
                 return;
             }
+
+            // confirm lync has started
+            if (!LClient.GetClient().Init())
+            {
+                MessageBox.Show("Start Lync First please.", "LyncMsg");
+                return;
+            }
+
             if (WinApi.IsWindowVisible(handle) && (WinApi.IsIconic(handle) || WinApi.GetForegroundWindow() != handle))
                 WinApi.SwitchToThisWindow(handle, true);
             else

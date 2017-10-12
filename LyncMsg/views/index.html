@@ -133,7 +133,7 @@
         var messages = $(".messages");
         var userLine = $('<span style="color: blue">' + msg.Date + '   ' + msg.UserName.replace(/\(.*?\)/, '') + '</span><br/>');
         var content = msg.Message.replace(' ', '&nbsp;').replace('<','&lt;').replace('>','&gt;');
-        var msgPanel = $('<pre style="margin-left: 10px">' + content + '</pre>');
+        var msgPanel = $('<pre style="margin-left: 10px">' + content.trim() + '</pre>');
         var para = $('<div class="msg_line" data-chatId="'+ msg.ChatId + '"></div>');
         userLine.appendTo(para);
         msgPanel.appendTo(para);

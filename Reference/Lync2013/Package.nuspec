@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<package >
+  <metadata>
+    <id>Microsoft.Lync.SDK.2013</id>
+    <version>15.0.4603.1000</version>
+    <authors>Microsoft</authors>
+    <owners>Microsoft</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Lync 2013 SDK</description>
+    <releaseNotes>Only can be used on machine installed Lync 2013.</releaseNotes>
+    <copyright>Copyright 2016</copyright>
+    <tags>Lync 2013 Microsoft</tags>
+  </metadata>
+</package>

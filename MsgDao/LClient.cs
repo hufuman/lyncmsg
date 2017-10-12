@@ -1,21 +1,35 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
 using Microsoft.Lync.Model;
 
 namespace MsgDao
 {
     public class LClient
     {
-        private readonly LyncClient _lyncClient = LyncClient.GetClient();
+        private LyncClient _lyncClient;
 
         private LClient()
         {
         }
 
-        static private readonly LClient ClientInstance = new LClient();
+        private static readonly LClient ClientInstance = new LClient();
 
-        static public LClient GetClient()
+        public static LClient GetClient()
         {
             return ClientInstance;
+        }
+
+        public bool Init()
+        {
+            try
+            {
+                _lyncClient = LyncClient.GetClient();
+                return _lyncClient != null && _lyncClient.State == ClientState.SignedIn;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
         public string GetVersion()

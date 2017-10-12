@@ -44,7 +44,7 @@ namespace MsgDao
             return result;
         }
 
-        internal static bool ExecuteSqlNoQuery(SQLiteConnection sqlCnn, string sql,
+        public static bool ExecuteSqlNoQuery(SQLiteConnection sqlCnn, string sql,
             SQLiteParameter[] parameters)
         {
             SQLiteCommand command = null;
@@ -66,7 +66,7 @@ namespace MsgDao
             }
         }
 
-        internal static SQLiteParameter BuildParameter(string name, System.Data.DbType dbType, object value)
+        public static SQLiteParameter BuildParameter(string name, System.Data.DbType dbType, object value)
         {
             var result = new SQLiteParameter(dbType)
             {
